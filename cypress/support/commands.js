@@ -12,3 +12,46 @@ Cypress.Commands.add("Resetar", () => {
     cy.get(loc.MENU.MENU_SETTINGS).click();
     cy.get(loc.MENU.RESET).click();
 })
+
+Cypress.Commands.add('getToken', (user, passwd) => {
+    cy.request({
+        method: 'POST',
+        url: '/signin',
+        body: {
+            email: user,
+            redirecionar: false,
+            senha: passwd
+        }
+    }).its('body.token').should('not.be.empty')
+        .then(token => {
+            return token
+        })
+
+    // https://barrigarest.wcaquino.me/reset
+})
+
+Cypress.Commands.add('resetRest', () => {
+    cy.getToken('ruan@cypress.com', 'Gyn7oau8').then(token => {
+        cy.request({
+            method: "GET",
+            url: "/reset",
+            headers: { Authorization: `JWT ${token}` }
+        })
+    })
+})
+
+
+Cypress.Commands.add('getContaByName', name => {
+    cy.getToken('ruan@cypress.com', 'Gyn7oau8').then(token => {
+        cy.request({
+            method: 'GET',
+            url: '/contas',
+            headers: { Authorization: `JWT ${token}` },
+            qs: {
+                nome: name
+            }
+        }).then(res => {
+            return res.body[0].id
+        })
+    })
+})

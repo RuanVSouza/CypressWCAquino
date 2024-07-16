@@ -5,5 +5,7 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       testIsolation: false
     },
+    baseUrl: "https://barrigarest.wcaquino.me",
   },
+  
 });
