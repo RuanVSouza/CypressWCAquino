@@ -3,13 +3,13 @@
 const dayjs = require('dayjs')
 
 describe('Trabalhando com elementos basicos', () => {
-    let token
+    // let token
 
     beforeEach(() => {
         cy.getToken('ruan@cypress.com', 'Gyn7oau8')
-            .then(tkn => {
-                token = tkn
-            })
+        // .then(tkn => {
+        //     token = tkn
+        // })
     })
 
     beforeEach(() => {
@@ -19,7 +19,7 @@ describe('Trabalhando com elementos basicos', () => {
         cy.request({
             url: '/contas',
             method: 'POST',
-            headers: { Authorization: `JWT ${token}` },
+            // headers: { Authorization: `JWT ${token}` },
             body: {
                 nome: "Conta Diferente3"
             }
@@ -38,7 +38,7 @@ describe('Trabalhando com elementos basicos', () => {
                 cy.request({
                     url: `/contas/${contaId}`,
                     method: 'PUT',
-                    headers: { Authorization: `JWT ${token}` },
+                    // headers: { Authorization: `JWT ${token}` },
                     body: {
                         nome: 'Conta alterada via rest'
                     }
@@ -51,7 +51,7 @@ describe('Trabalhando com elementos basicos', () => {
         cy.request({
             url: '/contas',
             method: 'POST',
-            headers: { Authorization: `JWT ${token}` },
+            // headers: { Authorization: `JWT ${token}` },
             body: {
                 nome: "Conta mesmo nome"
             },
@@ -70,7 +70,7 @@ describe('Trabalhando com elementos basicos', () => {
                 cy.request({
                     method: 'POST',
                     url: '/transacoes',
-                    headers: { Authorization: `JWT ${token}` },
+                    // headers: { Authorization: `JWT ${token}` },
                     body: {
                         conta_id: contaId,
                         data_pagamento: dayjs().add(1, "day").format('DD/MM/YYYY'),
@@ -87,11 +87,11 @@ describe('Trabalhando com elementos basicos', () => {
         cy.get('@response').its('body.id').should('exist')
     })
 
-    it.only("Pegar o saldo", () => {
+    it("Pegar o saldo", () => {
         cy.request({
             url: '/saldo',
             method: 'GET',
-            headers: { Authorization: `JWT ${token}` }
+            // headers: { Authorization: `JWT ${token}` }
         }).then(res => {
             let saldoConta = null
             res.body.forEach(c => {
@@ -103,19 +103,17 @@ describe('Trabalhando com elementos basicos', () => {
         cy.request({
             method: "GET",
             url: '/transacoes',
-            headers: { Authorization: `JWT ${token}` },
+            // headers: { Authorization: `JWT ${token}` },
             qs: { descricao: 'Movimentacao 1, calculo saldo' }
         }).then(res => {
             console.log(res.body[0])
             cy.request({
-
                 url: `/transacoes/${res.body[0].id}`,
                 method: 'PUT',
-                headers: { Authorization: `JWT ${token}` },
+                // headers: { Authorization: `JWT ${token}` },
                 body: {
                     status: true,
                     data_transacao: dayjs(res.body[0].data_transacao).format('DD/MM/YYYY'),
-                    // data_transacao: Cypress.moment(res.body[0].data_transacao).format('DD/MM/YYYY'),
                     data_pagamento: dayjs(res.body[0].data_pagamento).format('DD/MM/YYYY'),
                     descricao: res.body[0].descricao,
                     envolvido: res.body[0].envolvido,
@@ -128,7 +126,7 @@ describe('Trabalhando com elementos basicos', () => {
         cy.request({
             url: '/saldo',
             method: 'GET',
-            headers: { Authorization: `JWT ${token}` }
+            // headers: { Authorization: `JWT ${token}` }
         }).then(res => {
             let saldoConta = null
             res.body.forEach(c => {
@@ -141,6 +139,18 @@ describe('Trabalhando com elementos basicos', () => {
     })
 
     it("Removar movimentação", () => {
-
+        cy.request({
+            method: "GET",
+            url: '/transacoes',
+            // headers: { Authorization: `JWT ${token}` },
+            qs: { descricao: 'Movimentacao para exclusao' }
+        }).then(res => {
+            console.log(res.body[0])
+            cy.request({
+                method: "DELETE",
+                url: `/transacoes/${res.body[0].id}`,
+                // headers: { Authorization: `JWT ${token}` },
+            }).its('status').should('be.equal', 204)
+        })
     })
 })
