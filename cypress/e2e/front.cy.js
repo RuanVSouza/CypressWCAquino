@@ -3,6 +3,7 @@
 import loc from '../support/locators'
 import '../support/commandsContas'
 import '../support/commandsMovimentacao'
+import buildEnv from '../support/buildEnv'
 
 describe('Trabalhando com elementos basicos', () => {
     after(() => {
@@ -11,47 +12,20 @@ describe('Trabalhando com elementos basicos', () => {
 
 
     beforeEach(() => {
-        // cy.server()
-        cy.intercept({
-            url: '/signin',
-            method: 'POST',
-        },
-            {
-                id: 1000,
-                nome: "Usuario falso",
-                token: 'Uma string muito grande que não deveria ser aceito mas na vdd vai'
-            }).as('signin')
-
-        cy.intercept({
-            method: 'GET',
-            url: '/saldo'
-        }, [
-            { conta_id: 9909, conta: 'Conta falsa 1', saldo: '10000000.00' },
-            { conta_id: 999, conta: 'Carteira', saldo: '100.00' }
-        ]).as('saldo')
-
-
-        cy.login('ruan@cypress.com', 'senhaerrada')
 
     })
 
     beforeEach(() => {
+        buildEnv()
+        cy.login('ruan@cypress.com', 'senhaerrada')
         cy.get(loc.MENU.HOME).click()
         // cy.Resetar()
     })
-    it.only("Inserindo nova conta", () => {
+    it("Inserindo nova conta", () => {
         cy.intercept({
-            method: 'GET',
-            url: '/contas',
-        }, [
-            { id: 1, nome: "Carteira", visivel: true, usuario_id: 51498 },
-            { id: 2, nome: "Banco", visivel: true, usuario_id: 51498 },
-        ]).as('contas')
-
-        cy.intercept({
-            method: "POST",
+            method: 'POST',
             url: '/contas'
-        }, { id: 3, nome: "Conta de teste", visivel: true, usuario_id: 51498 }).as('SalvandoConta')
+        }, { id: 3, nome: "Conta de teste", visivel: true, usuario_id: 51498 })
 
         cy.acessarMenuConta()
 
@@ -69,8 +43,13 @@ describe('Trabalhando com elementos basicos', () => {
     })
 
     it("Deve atualizar uma conta", () => {
+        cy.intercept({
+            method: "PUT",
+            url: "/contas/**"
+        }, { id: 1, nome: "Carteira", visivel: true, usuario_id: 51498 })
+
         cy.acessarMenuConta()
-        cy.xpath(loc.CONTAS.FN_XP_BTN_ALTERAR('Conta para alterar')).click()
+        cy.xpath(loc.CONTAS.FN_XP_BTN_ALTERAR('Carteira')).click()
         cy.get(loc.CONTAS.NOME)
             .clear()
             .type("Conta alterada")
@@ -79,18 +58,38 @@ describe('Trabalhando com elementos basicos', () => {
     })
 
     it("criando uma conta com mesmo nome", () => {
+        cy.intercept({
+            method: 'POST',
+            url: '/contas'
+        }, { error: "Já existe uma conta com esse nome!", statusCode: 400 }).as('contaMesmoNome')
         cy.acessarMenuConta()
 
         cy.get(loc.CONTAS.NOME).type('Conta mesmo nome')
         cy.get(loc.CONTAS.BTN_SALVAR).click()
         cy.get(loc.MESSAGE).should('contain', '400')
+
+
     })
 
-    it("Consultar e fazer movimentação", () => {
+    it.only("Consultar e fazer movimentação", () => {
+        cy.intercept({
+            method: 'POST',
+            url: '/transacoes'
+        }, {
+            "id": 2081895, "descricao": "12321", "envolvido": "adw", "observacao": null, "tipo": "REC", "data_transacao": "2024-07-29T03:00:00.000Z", "data_pagamento": "2024-07-29T03:00:00.000Z", "valor": "123.00", "status": false, "conta_id": 2214127, "usuario_id": 51498, "transferencia_id": null, "parcelamento_id": null
+        })
+
+        cy.intercept({
+            method: 'GET',
+            url: '/extrato/**'
+        }, { fixture: "movimentacaoSalva" }
+
+        )
+
         cy.acessarMovimentacao()
-        cy.inserirMovimentacao('Conta a pagar', '300.00', 'Eu mesmo', 'Conta para movimentacoes')
+        cy.inserirMovimentacao('Desc', '123.00', 'Eu mesmo', 'Banco')
         cy.get(loc.EXTRATO.LINHAS).should('have.length', 7)
-        cy.xpath(loc.EXTRATO.FN_XP_BUSCA_ELEMENTO('Conta a pagar', '300')).should('exist')
+        cy.xpath(loc.EXTRATO.FN_XP_BUSCA_ELEMENTO('Desc', '123')).should('exist')
     })
 
     it("Pegar o saldo", () => {
