@@ -6,8 +6,8 @@ import '../support/commandsMovimentacao'
 
 describe('Trabalhando com elementos basicos', () => {
     beforeEach(() => {
-       cy.login('ruan@cypress.com', 'Gyn7oau8')
-       cy.Resetar()
+        cy.login('ruan@cypress.com', 'Gyn7oau8')
+        cy.Resetar()
     })
 
     beforeEach(() => {
@@ -26,16 +26,16 @@ describe('Trabalhando com elementos basicos', () => {
         cy.get(loc.CONTAS.NOME)
             .clear()
             .type("Conta alterada")
-            cy.get(loc.CONTAS.BTN_SALVAR).click()
-            cy.get(loc.MESSAGE).should('contain', 'Conta atualizada com sucesso')    
+        cy.get(loc.CONTAS.BTN_SALVAR).click()
+        cy.get(loc.MESSAGE).should('contain', 'Conta atualizada com sucesso')
     })
 
     it("criando uma conta com mesmo nome", () => {
         cy.acessarMenuConta()
-        
+
         cy.get(loc.CONTAS.NOME).type('Conta mesmo nome')
-            cy.get(loc.CONTAS.BTN_SALVAR).click()
-            cy.get(loc.MESSAGE).should('contain', '400')    
+        cy.get(loc.CONTAS.BTN_SALVAR).click()
+        cy.get(loc.MESSAGE).should('contain', '400')
     })
 
     it("Consultar e fazer movimentação", () => {
@@ -55,15 +55,15 @@ describe('Trabalhando com elementos basicos', () => {
         cy.wait(5000)
         cy.get(loc.CONTAS.STATUS).click()
         cy.get(loc.MOVIMENTACAO.BTN_SALVAR_SALDO).click()
-        cy.get(loc.MESSAGE).should('contain', 'sucesso')    
+        cy.get(loc.MESSAGE).should('contain', 'sucesso')
         cy.get(loc.MENU.HOME).click()
         cy.xpath(loc.SALDO.FN_XP_SALDO_CONTA('Conta para saldo')).should('contain', '4.034,00')
     })
 
-    it("Removar movimentação", () => {
+    it.only("Removar movimentação", () => {
         cy.get(loc.MENU.EXTRATO).click()
-        cy.xpath(loc.EXTRATO.FN_XP_DELETAR_ELEMENTO('Movimentacao para exclusao')).click()
-        cy.get(loc.MESSAGE).should('contain', 'Movimentação removida com sucesso!')   
+        cy.xpath(loc.EXTRATO.FN_XP_REMOVER_ELEMENTO('Movimentacao para exclusao')).click()
+        cy.get(loc.MESSAGE).should('contain', 'Movimentação removida com sucesso!')
 
     })
 })
