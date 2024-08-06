@@ -17,6 +17,25 @@ describe('Trabalhando com elementos basicos', () => {
         cy.get(loc.MENU.HOME).click()
         // cy.Resetar()
     })
+
+    it('deve testar responsividade', () => {
+        cy.get('[data-test="menu-home"]').should('exist')
+            .and('be.visible')
+
+        cy.viewport(500, 700)
+
+        cy.get('[data-test="menu-home"]').should('exist')
+            .and('be.not.visible')
+
+        cy.viewport('iphone-5').as('iphone 5')
+        cy.get('[data-test="menu-home"]').should('exist')
+            .and('be.not.visible')
+
+        cy.viewport('ipad-2').as('ipda2')
+        cy.get('[data-test="menu-home"]').should('exist')
+            .and('be.visible')
+    })
+
     it("Inserindo nova conta", () => {
         cy.intercept({
             method: 'POST',
@@ -221,7 +240,7 @@ describe('Trabalhando com elementos basicos', () => {
         cy.get(loc.MESSAGE).should('contain', 'Conta inserida com sucesso')
     })
 
-    it.only('Testando as cores de contas', () => {
+    it('Testando as cores de contas', () => {
         cy.intercept({
             method: "GET",
             url: '/extrato/**'
@@ -240,7 +259,6 @@ describe('Trabalhando com elementos basicos', () => {
         cy.xpath(loc.EXTRATO.FN_XP_LINHA('Despesa paga')).should('have.class', 'despesaPaga')
         cy.xpath(loc.EXTRATO.FN_XP_LINHA('Despesa pendente')).should('have.class', 'despesaPendente')
     })
-
 
 
 })
